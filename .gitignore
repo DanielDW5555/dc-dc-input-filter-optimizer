@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Generated outputs — re-created by running DE_optimization.py
+*.png
+*.csv
+_opt_*.sp
+
+# Debug
+debug/
