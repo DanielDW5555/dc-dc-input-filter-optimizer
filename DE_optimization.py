@@ -77,6 +77,19 @@ bounds = [
     (100e-9, 100e-6),   # Cdamp  100 nF – 100 µF   (ceramic or film)
 ]
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Standard capacitor values (E24 series) — disabled for now
+# ─────────────────────────────────────────────────────────────────────────────
+
+# _E24 = [1.0, 1.1, 1.2, 1.3, 1.5, 1.6, 1.8, 2.0, 2.2, 2.4,
+#         2.7, 3.0, 3.3, 3.6, 3.9, 4.3, 4.7, 5.1, 5.6, 6.2,
+#         6.8, 7.5, 8.2, 9.1]
+
+# def round_to_e24(value):
+#     """Snap a capacitance to the nearest E24 standard value."""
+#     decade = 10 ** math.floor(math.log10(value))
+#     return min(_E24, key=lambda x: abs(x - value / decade)) * decade
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Cost function
@@ -421,19 +434,36 @@ if __name__ == "__main__":
     x_opt, cost_opt = differential_evolution(bounds, NP=60, F=0.7, CR=0.7, max_gen=500)
 
     L1, C1, Rdamp, Cdamp = x_opt
-    filt_opt = input_filter.filter(*x_opt, parasitics, circuit_parameters)
-    filt_opt.update()
-    _, _, _, att_Fsw = filt_opt.get_outputs()
-
-    print("\n── Optimal design ─────────────────────────────────")
+    print("\n── Optimal design ──────────────────────────────────")
     print(f"  L1    = {L1*1e6:.2f} µH")
     print(f"  C1    = {C1*1e6:.3f} µF")
     print(f"  Rdamp = {Rdamp:.2f} Ω")
     print(f"  Cdamp = {Cdamp*1e6:.2f} µF")
     print(f"  Final cost = {cost_opt:.6f}  (0.0 = all constraints satisfied)")
+
+    # # ── E24 rounding (disabled) ─────────────────────────────
+    # C1_std    = round_to_e24(C1)
+    # Cdamp_std = round_to_e24(Cdamp)
+    # x_std     = [L1, C1_std, Rdamp, Cdamp_std]
+
+    filt_opt = input_filter.filter(*x_opt, parasitics, circuit_parameters)
+    filt_opt.update()
+    max_att, min_Zin, max_Zout, att_Fsw = filt_opt.get_outputs()
+
+    def ok(v): return 'OK' if v < 1e-10 else 'FAIL'
     print(f"\n── Constraint check ────────────────────────────────")
+    print(f"  Resonance peak     : {input_filter.mag2dB(max_att):.1f} dB"
+          f"  (limit ≤ {input_filter.mag2dB(specs['att_peak_limit']):.0f} dB)"
+          f"  {ok(violation(max_att, specs['att_peak_limit']))}")
+    print(f"  Min input impedance: {min_Zin:.3f} Ω"
+          f"  (limit ≥ {specs['Zin_min']:.1f} Ω)"
+          f"  {ok(violation(specs['Zin_min'], min_Zin))}")
+    print(f"  Max output impedance: {max_Zout:.3f} Ω"
+          f"  (limit ≤ {specs['Zout_max']:.3f} Ω)"
+          f"  {ok(violation(max_Zout, specs['Zout_max']))}")
     print(f"  Attenuation at Fsw : {input_filter.mag2dB(att_Fsw):.1f} dB"
-          f"  (target ≤ {input_filter.mag2dB(specs['att_at_Fsw_max']):.0f} dB)")
+          f"  (limit ≤ {input_filter.mag2dB(specs['att_at_Fsw_max']):.0f} dB)"
+          f"  {ok(violation(att_Fsw, specs['att_at_Fsw_max']))}")
     print(f"  Zin_conv           : {Zin_conv:.2f} Ω")
     print(f"  Middlebrook limit  : {specs['Zout_max']:.3f} Ω")
 

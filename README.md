@@ -79,9 +79,11 @@ The parallel RC damping network (R\_damp + C\_damp) damps the LC resonance witho
 | R\_damp | 1.50 Ω |
 | C\_damp | 7.77 µF |
 
-All four constraints satisfied. Converged in 302 generations.
+All four constraints satisfied. Converged in ~300 generations.
 
-![Filter response](optimal_filter_response.png)
+![Filter frequency response](optimal_filter_response.png)
+
+*Three-panel Bode plot: voltage attenuation, input impedance, and output impedance. Solid line = Python analytical model, dashed = ngspice SPICE simulation.*
 
 ---
 
