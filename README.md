@@ -13,7 +13,7 @@ A single-stage LC filter with a parallel RC damping network addresses both probl
 - More attenuation → larger resonant peak
 - Better damping → higher output impedance
 - Middlebrook stability → bounds on output impedance
-- EMI Class B → minimum attenuation at F_sw
+- Conducted emissions → minimum attenuation at F_sw
 
 This tool finds the global optimum automatically.
 
@@ -50,7 +50,7 @@ Each candidate design is scored by computing the filter's frequency response ana
 | Resonance peaking | Damping requirement | ≤ 3 dB |
 | Filter input impedance | Source protection | ≥ 0.5 Ω |
 | Filter output impedance | Middlebrook stability criterion | ≤ Z\_in,conv / 10 dB |
-| Attenuation at F\_sw | CISPR 32 / EN 55032 Class B | ≤ −40 dB |
+| Attenuation at F\_sw | Conducted emissions limit | ≤ −40 dB |
 
 A small secondary term (1% weight) biases toward smaller component values once all constraints are satisfied, acting as a physical size tiebreaker.
 
